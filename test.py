@@ -7,7 +7,7 @@ def scrape_job_detail(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
-    
+
     try:
         print(f"\nProcessing URL: {url}")
         response = requests.get(url, headers=headers)
@@ -31,12 +31,17 @@ def scrape_job_detail(url):
         else:
             print("找不到第二個 location")
 
+        update_date = soup.select("div.basic-info__icon--last_updated_at")[0].select_one("p.basic-info__last_updated_at").get_text()[6:].strip()
+        if update_date:
+            print("最近更新日期：", update_date)
 
         # Define the sections we are looking for
         sections = {
             "Job Description": "工作內容",
             "Requirements": "條件要求",
-            "Salary": "薪資範圍"
+            "Bonus Requirements":"加分條件",
+            "Salary": "薪資範圍",
+            "Remote Type":"遠端型態"
         }
         
         for name, keyword in sections.items():
@@ -52,14 +57,14 @@ def scrape_job_detail(url):
             for h in header_tags:
                 # Filter out obvious navigation or unrelated elements if needed
                 if len(h.get_text(strip=True)) > 20: # Skip long paragraphs that just happen to contain the word
-                     continue
-                     
+                    continue
+                    
                 # Try to find the content following this header
                 
                 # Check next sibling
                 next_sibling = h.find_next_sibling()
                 if next_sibling:
-                    if keyword == "薪資範圍":
+                    if (keyword == "薪資範圍") or (keyword == "遠端型態"):
                         print(next_sibling.get_text(strip=True))
                     else: 
                         print(next_sibling.get_text())
